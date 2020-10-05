@@ -122,7 +122,7 @@ def loadData(fname, ts=indexCol, nan_vals=inputNans):
 
     logging.info("Loading " + fname + "...")
     logCurrentFile = "[" + fname + "]\t"
-    d = pd.read_csv(fpath, header=[headerRow], skiprows=skipRows, parse_dates=[ts], na_values=nan_vals)
+    d = pd.read_csv(fname, header=[headerRow], skiprows=skipRows, parse_dates=[ts], na_values=nan_vals)
     d.index = pd.DatetimeIndex(d[ts])
     logging.debug(str(d.info()).replace("\n","\n\t"))
 
