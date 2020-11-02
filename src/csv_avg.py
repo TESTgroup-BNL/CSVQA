@@ -219,13 +219,13 @@ def avgToFreqs(df, ts=indexCol):
 def applyDataTypes(df):
     #Fix integer columns
     for intCol in intCols:
-        df[intCol] = df[intCol].map(lambda x: '%i' % x if not pd.isna(x) else outputNans)
+        df[intCol] = df[intCol].apply(lambda x: '%i' % x if not pd.isna(x) else outputNans)
 
     #Apply precision
     if outputDecs == 'original':
         for col in df.columns:
             if (col not in timeCols) and (col not in intCols):
-                df[col] = df[col].map(lambda x: ('%0.' + str(maxDec[col]) + 'f') % x if not pd.isna(x) else outputNans)
+                df[col] = df[col].apply(lambda x: ('%0.' + str(maxDec[col]) + 'f') % x if not pd.isna(x) else outputNans)
     #else default will be applied when writing output
 
 
