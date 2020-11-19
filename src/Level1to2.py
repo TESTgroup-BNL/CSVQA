@@ -194,7 +194,10 @@ def calcDecPlaces(d, timeCols, outputDecs, outputDecsMin, outputDecsMax, sourceC
 
 def calcQAStats(d, d_qa, d_dev):
     #QA Mask Stats
-    d_stats = d_qa.apply(pd.value_counts)
+    try:
+        d_stats = d_qa.drop("idx", axis=1).apply(pd.value_counts)
+    except KeyError:
+        d_stats = d_qa.apply(pd.value_counts)
     d_stats = d_stats.reindex(range(4))
     d_stats = d_stats.mask(d_stats.isna(),0).astype(int)
     
@@ -304,7 +307,7 @@ if __name__ == "__main__":
 
     for fname in getFiles(fPath, opts["Level 1"]["altFileSuffix"]):
 
-        fname_out = fname.replace("_Level1_","")
+        fname_out = fname.replace("_Level1","")
         
         #Load Level 1 data
         d = loadData(fname, ts=opts["Input"]["indexCol"], nan_vals=opts["Output"]["outputNans"])
