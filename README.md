@@ -36,9 +36,12 @@ The QA mask file contains the following flags for each data point, which will in
 |0|Good|Keep as-is|
 |1|Out of dat/time range|Remove|
 |2|Out of source characteristic range|Replace with Nan value|
-|3|Significant deviation from alternate source|Replace with alternate source value|
+|3|1 + 2|None|
+|4|Significant deviation from alternate source|Replace with alternate source value|
+|5|2 + 3|None|
+|6|1 + 2 + 3|None|
 
-An easy way to check and modify the flagged areas is to open the mask file in Excel and filter by the column and flag of interest.  Affected values can then easily be selected and changed in bulk.  The modified file should be saved as ***filename_Level2_mask.csv***.  Be sure that the Timestamp format in Excel is set to "yyyy-mm-dd hh:mm:ss" before saving.
+An easy way to check and modify the flagged areas is to open the mask file in Excel and filter by the column and flag of interest.  Affected values can then easily be selected and changed in bulk.  The modified file should be saved as ***filename_Level2_mask.csv***.  Be sure that the Timestamp format in Excel is set to "yyyy-mm-dd hh:mm:ss" before saving.  Combination flags have no effect on the output and should be manually replaced to reflect the intended action.
 
 ### Source Characteristics
 

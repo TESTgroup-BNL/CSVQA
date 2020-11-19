@@ -200,18 +200,18 @@ def calcQAStats(d, d_qa, d_dev):
         d_stats = d_qa.drop("idx", axis=1).apply(pd.value_counts)
     except KeyError:
         d_stats = d_qa.apply(pd.value_counts)
-    d_stats = d_stats.reindex(range(4))
+    d_stats = d_stats.reindex(range(7))
     d_stats = d_stats.mask(d_stats.isna(),0).astype(int)
     
     #Alt source correlations
     if d_dev is not None:
-        s_coor = [pd.Series([],dtype=float,name="corr " + n) for n in ("raw","0","1","2","3")]
+        s_coor = [pd.Series([],dtype=float,name="corr " + n) for n in ("raw","0","1","2","3","4","5","6")]
         d_stats = d_stats.append(s_coor)
 
         for c in d_stats.columns:
             try:
                 d_stats[c]["corr raw"] = d_dev[c].corr(d_dev[c + "_alt"])
-                for n in range(4):
+                for n in range(7):
                     d_stats[c]["corr " + str(n)] = d_dev[c][d_qa[c]==n].corr(d_dev[c + "_alt"][d_qa[c]==n])
                     
             except KeyError:
@@ -288,7 +288,7 @@ def applyQA(d, d_qa, d_dev):
     #Fill alternate data
     for c in d_out:
         try:
-            d_out[c] = d_out[c].mask(d_qa[c]==3, d_dev[c + "_alt"])
+            d_out[c] = d_out[c].mask(d_qa[c]==4, d_dev[c + "_alt"])
         except KeyError:
             pass
         except Exception as e:
@@ -318,7 +318,7 @@ if __name__ == "__main__":
 
         #Load Level 2 data
         fname_s = os.path.splitext(fname)
-        d_qa = loadData(fname_s[0] + "_qa" + fname_s[1], ts="idx", nan_vals=opts["Output"]["outputNans"])
+        d_qa = loadData(fname_s[0].replace("_Level1","_Level2") + "_mask" + fname_s[1], ts="idx", nan_vals=opts["Output"]["outputNans"])
         if d_qa is None:
             logging.warning("Could not open mask file for " + fname + ", skipping.")
             continue

@@ -251,7 +251,7 @@ def createQAdf(d, sourceChars, indexCol, devThreshold=0.1, d_dev=None):
                 if c != indexCol:
                     devCol = c + "_dev"
                     maxDev = (sourceChars[c]["maxVal"] - sourceChars[c]["minVal"])*devThreshold
-                    d_qa[c] = d_qa[c].mask(abs(d_dev[devCol]) >  maxDev,3)
+                    d_qa[c] = d_qa[c].mask(abs(d_dev[devCol]) >  maxDev, d_qa[c] + 3)
                     logging.info("For " + c + ", using max deviation: " + str(maxDev))
             except KeyError:
                 pass
@@ -260,7 +260,7 @@ def createQAdf(d, sourceChars, indexCol, devThreshold=0.1, d_dev=None):
 
     #Check start and end dates/times
     try:
-        d_qa[(d_qa.index < sourceChars["start"]) | (d_qa.index > sourceChars["end"])] = 1
+        d_qa[(d_qa.index < sourceChars["start"]) | (d_qa.index > sourceChars["end"])] += 1
         logging.info("Start bound: " + str(sourceChars["start"]) + "\tEnd bound: " + str(sourceChars["end"]))
     except KeyError:
         pass
@@ -274,18 +274,18 @@ def createQAdf(d, sourceChars, indexCol, devThreshold=0.1, d_dev=None):
 def calcQAStats(d, d_qa, d_dev):
     #QA Mask Stats
     d_stats = d_qa.apply(pd.value_counts)
-    d_stats = d_stats.reindex(range(4))
+    d_stats = d_stats.reindex(range(7))
     d_stats = d_stats.mask(d_stats.isna(),0).astype(int)
     
     #Alt source correlations
     if d_dev is not None:
-        s_coor = [pd.Series([],dtype=float,name="corr " + n) for n in ("raw","0","1","2","3")]
+        s_coor = [pd.Series([],dtype=float,name="corr " + n) for n in ("raw","0","1","2","3","4","5","6")]
         d_stats = d_stats.append(s_coor)
 
         for c in d_stats.columns:
             try:
                 d_stats[c]["corr raw"] = d_dev[c].corr(d_dev[c + "_alt"])
-                for n in range(4):
+                for n in range(7):
                     d_stats[c]["corr " + str(n)] = d_dev[c][d_qa[c]==n].corr(d_dev[c + "_alt"][d_qa[c]==n])
                     
             except KeyError:
