@@ -1,6 +1,6 @@
 # CSVQA
  Tools for QA/QC checks and fixes for CSV files
-*************************************
+
 ## Workflow
 
 |Data State|Input|Output|Procedure|
@@ -9,6 +9,7 @@
 |Level 1   | - Primary data as CSV(s): *filename.csv*<BR>- Configuration file: *default.conf*<BR>Optionally:<BR>- Source characteristics file<BR>- Alternate data source files(s): *filename_alt.csv* | -Level 1 data: *filename_Level1.csv* <BR>- QA mask file: *filename_Level1_qa.csv*<BR>- Deviation file:*filename_Level1_dev.csv*<BR>- Log file| Level0to1.py|
 |Level 2   | - Level 1 data: *filename_Level1.csv*<BR>- Configuration file: *default.conf*<BR>- Reviewed QA mask file: *filename_Level2_mask.csv* <BR>- Deviation file: *filename_Level1_dev.csv* | - Processed, combined\* data: *filename_Level2.csv*<BR>- Data aggregated to additional intervals: *filename_Level2_avg_interval.csv* | Level1to2.py |
 |Level 3   | | | | 
+
 <I>\*(If alternate source included)</I>
 
 If an alternate data source uses a larger sample interval than the primary source, values will be back-filled.  An alternate source with a shorter sample interval than the primary source may have issues (has not been tested).
@@ -34,8 +35,8 @@ In the future, the functions used in these scripts should be made into a proper 
 These scripts are not optimized for memory usage and should be expected to potentially use more than twice the memory as the size of the original data, possibly much more depending on resampling intervals.  They are also not optimized for multi-threaded processing; an obvious improvement could be made by run resmapling of different intervals in parallel.
 
 **Known Issues:**
--If timestamp column isn't first, resampling may fail.
--Index column is not excluded from correlation calcs, throws a warning
+- If timestamp column isn't first, resampling may fail.
+- Index column is not excluded from correlation calcs, throws a warning
 
 
 ******************************
@@ -50,7 +51,6 @@ The output of this should be manually reviewed before being used for Level 2.
 #### Tool for processing data from Level 1 to Level 2
 See parameters defined in configuration file (default.conf) for details.
 
-******************************
 
 ## Other Utilities:
 
@@ -58,7 +58,6 @@ See parameters defined in configuration file (default.conf) for details.
 #### Tool for averaging data to one or more timescales
 See parameters defined in script for details.
 
-******************************
 
 ## Example Data
 ### /data
