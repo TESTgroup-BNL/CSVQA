@@ -76,7 +76,7 @@ def setupLogging(fpath, consoleLogLevel=0):
     ch.setFormatter(formatter)
     ch.setLevel(consoleLogLevel)
 
-    logFile = os.path.join(os.path.abspath(fpath), "Level1to2"+ datetime.now().strftime("%Y-%m-%d_%H%M%S") + ".log")
+    logFile = os.path.join(os.path.abspath(fpath), "Level1to2_"+ datetime.now().strftime("%Y-%m-%d_%H%M%S") + ".log")
     fh = logging.FileHandler(logFile, mode='w')
     fh.setFormatter(formatter)
     fh.setLevel(logging.DEBUG)
