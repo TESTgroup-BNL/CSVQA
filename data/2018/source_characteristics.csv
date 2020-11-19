@@ -1,0 +1,17 @@
+﻿Sensor,Unit,Accuracy,Precision,Useful Decimal Places,Min,Max,Columns,Comments
+Start, 2018-06-16 00:00:00,,,,,,,
+End, 2018-09-24 00:00:00,,,,,,,
+HOBO air temp,Deg_C,Accuracy: +/- 0.53°C,Resolution: 0.14°C,2,-10,40,,
+Met One 085 temp,Deg_C,Range: Accuracy: ±.15°C (0.27°C),,2,-10,40,AirT,
+Met One 085 RH,%,±2.0%,,0,0,100,RH,Percent in decimal form (1.0 = 100%)
+Apogee IR radiometer,Deg_C,0.2°C (|target - detector|≤20°C); 0.5°C (|target - detector|>20°C),,1,-10,50,IR_Rad_Target(1);IR_Rad_Target(2),
+Li-Cor LI-200R pyranometer,W/m^2,,,1,0,3000,Solar,
+SRS-NDVI down,,,,,,,,
+SRS-NDVI up,,,,,,,,
+SRS-NDVI,W m-2 nm-2 nm-1 sr-1,≤10%,,,,,NDVI_Inside;NDVI_Outside,Percent in decimal form (1.0 = 100%)
+SRS-PRI down,,,,,,,,
+SRS-PRI up,,,,,,,,
+SRS-PRI,W m-2 nm-2 nm-1 sr-1,≤10%,,,,,PRI_Inside;PRI_Outside,Percent in decimal form (1.0 = 100%)
+soil temperature,deg_C,,,,,,SoilTemp(1);SoilTemp(2),
+soil moisture,m^3/m^3,,,,,,VWCp(1);VWCm(1);VWCp(2);VWCm(2),
+string pot,%,,,,,,StringPot,Percent in decimal form (1.0 = 100%)

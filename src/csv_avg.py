@@ -117,7 +117,7 @@ def getFiles(fpath):
     return [f for f in glob(fpath)]
 
 
-def loadData(fname, ts=indexCol, nan_vals=inputNans):
+def loadData(fname, ts=indexCol, nan_vals=inputNans, skipRows=[], headerRow=[]):
     global logCurrentFile, maxDec
 
     logging.info("Loading " + fname + "...")
