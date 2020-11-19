@@ -127,10 +127,10 @@ def loadSourceChars(sourceCharsFile):
     sourceChars = {}
     for x in d_chars.iloc:
         try:
-            if x["Sensor"]=="Start":
-                sourceChars["start"] = datetime.strptime(x["Unit"].strip(), "%Y-%m-%d %H:%M:%S")
-            if x["Sensor"]=="End":
-                sourceChars["end"] = datetime.strptime(x["Unit"].strip(), "%Y-%m-%d %H:%M:%S")
+            if x[0]=="Start":
+                sourceChars["start"] = datetime.strptime(x[1].strip(), "%Y-%m-%d %H:%M:%S")
+            if x[0]=="End":
+                sourceChars["end"] = datetime.strptime(x[1].strip(), "%Y-%m-%d %H:%M:%S")
 
             for c in x["Columns"].split(';'):
                 sourceChars[c] = {}
