@@ -10,16 +10,18 @@ from datetime import datetime
 
 
 def readConfig():
+    #Note: using print here instead of logging because logger isn't initialized
     try:
         fpath = None
-        if sys.argv[1][:-4] == "conf":
+        if sys.argv[1][-4:] == "conf":
             configFile = sys.argv[1]
-            logging.info("Using config file: " + configFile)
+            print("Using config file: " + configFile)
         else:
             fpath = sys.argv[1]
-            logging.info("Using source path: " + fpath)
+            configFile = "default.conf"
+            print("Using source path: " + fpath)
     except Exception:
-        #print here instead of logging because logger isn't initialized
+        
         print("No file paths provded, using defaults ('default.conf', './*.csv')")
         fpath = None
         configFile = "default.conf"
@@ -29,7 +31,6 @@ def readConfig():
         cp.optionxform = str    #changes the default parser to be case-sensitive
         cp.read(configFile)
     except Exception as e:
-        #print here instead of logging because logger isn't initialized
         print("Error loading config file: " + str(e))
         exit(e)     
 
@@ -57,7 +58,7 @@ def readConfig():
             opts["Output"]["consoleLogLevel"] = eval("logging." + opts["Output"]["consoleLogLevel"])
 
     except Exception as e:
-        logging.error("Error processing " + configFile + ": " + str(e))
+        print("Error processing " + configFile + ": " + str(e))
         exit(e)
 
     setupLogging(opts["Output"]["outputPath"], consoleLogLevel=opts["Output"]["consoleLogLevel"])
@@ -70,7 +71,8 @@ def setupLogging(fpath, consoleLogLevel=0):
     global logCurrentFile, logging
     logCurrentFile = ""
 
-    formatter = logging.Formatter('%(asctime)s\t[%(levelname)s]:\t%(logCurrentFile)s%(message)s')
+    format_str = '%(asctime)s\t[%(levelname)s]:\t%(logCurrentFile)s%(message)s'
+    formatter = logging.Formatter(format_str)
 
     ch = logging.StreamHandler(sys.stdout)
     ch.setFormatter(formatter)
@@ -81,7 +83,7 @@ def setupLogging(fpath, consoleLogLevel=0):
     fh.setFormatter(formatter)
     fh.setLevel(logging.DEBUG)
     
-    logging.basicConfig(level=logging.DEBUG, format=formatter, handlers=[fh, ch])
+    logging.basicConfig(level=logging.DEBUG, format=format_str, handlers=[fh, ch])
     logging.root.setLevel(logging.NOTSET)
     old_factory = logging.getLogRecordFactory()
 
@@ -279,12 +281,9 @@ def saveOutput(d, fpath, fname, sub, outputNans, indexCol=None, index=True):
 
 def applyQA(d, d_qa, d_dev):
     logging.info("Applying QA mask...")
-    
-    #Trim start and end times
-    d_out = d[d_qa["TIMESTAMP"]!=1]
-    
+      
     #Replace out of range values with Nans
-    d_out = d_out.mask(d_qa==2, pd.NA)
+    d_out = d.mask(d_qa==2, pd.NA)
 
     #Fill alternate data
     for c in d_out:
@@ -294,6 +293,9 @@ def applyQA(d, d_qa, d_dev):
             pass
         except Exception as e:
             logging.warning("Error applying alternate data for " + c + ": " + str(e))
+
+    #Trim start and end times
+    d_out = d_out[d_qa["TIMESTAMP"]!=1]
 
     return d_out
 

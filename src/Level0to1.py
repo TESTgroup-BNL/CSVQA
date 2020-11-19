@@ -10,16 +10,18 @@ from datetime import datetime
 
 
 def readConfig():
+    #Note: using print here instead of logging because logger isn't initialized
     try:
         fpath = None
-        if sys.argv[1][:-4] == "conf":
+        if sys.argv[1][-4:] == "conf":
             configFile = sys.argv[1]
-            logging.info("Using config file: " + configFile)
+            print("Using config file: " + configFile)
         else:
             fpath = sys.argv[1]
-            logging.info("Using source path: " + fpath)
+            configFile = "default.conf"
+            print("Using source path: " + fpath)
     except Exception:
-        #print here instead of logging because logger isn't initialized
+        
         print("No file paths provded, using defaults ('default.conf', './*.csv')")
         fpath = None
         configFile = "default.conf"
@@ -29,7 +31,6 @@ def readConfig():
         cp.optionxform = str    #changes the default parser to be case-sensitive
         cp.read(configFile)
     except Exception as e:
-        #print here instead of logging because logger isn't initialized
         print("Error loading config file: " + str(e))
         exit(e)     
 
@@ -57,7 +58,7 @@ def readConfig():
             opts["Output"]["consoleLogLevel"] = eval("logging." + opts["Output"]["consoleLogLevel"])
 
     except Exception as e:
-        logging.error("Error processing " + configFile + ": " + str(e))
+        print("Error processing " + configFile + ": " + str(e))
         exit(e)
 
     setupLogging(opts["Output"]["outputPath"], consoleLogLevel=opts["Output"]["consoleLogLevel"])
@@ -70,7 +71,8 @@ def setupLogging(fpath, consoleLogLevel=0):
     global logCurrentFile, logging
     logCurrentFile = ""
 
-    formatter = logging.Formatter('%(asctime)s\t[%(levelname)s]:\t%(logCurrentFile)s%(message)s')
+    format_str = '%(asctime)s\t[%(levelname)s]:\t%(logCurrentFile)s%(message)s'
+    formatter = logging.Formatter(format_str)
 
     ch = logging.StreamHandler(sys.stdout)
     ch.setFormatter(formatter)
@@ -81,7 +83,7 @@ def setupLogging(fpath, consoleLogLevel=0):
     fh.setFormatter(formatter)
     fh.setLevel(logging.DEBUG)
     
-    logging.basicConfig(level=logging.DEBUG, format=formatter, handlers=[fh, ch])
+    logging.basicConfig(level=logging.DEBUG, format=format_str, handlers=[fh, ch])
     logging.root.setLevel(logging.NOTSET)
     old_factory = logging.getLogRecordFactory()
 
@@ -231,17 +233,7 @@ def createQAdf(d, sourceChars, indexCol, devThreshold=0.1, d_dev=None):
     #Create QA dataframe
     d_qa = pd.DataFrame().reindex_like(d).fillna(0)
     d_qa = d_qa.astype(int)
-
-    #Check start and end dates/times
-    try:
-        d_qa[(d_qa.index < sourceChars["start"]) | (d_qa.index > sourceChars["end"])] = 1
-        logging.info("Start bound: " + str(sourceChars["start"]) + "\tEnd bound: " + str(sourceChars["end"]))
-    except KeyError:
-        pass
-    except Exception as e:
-        logging.warning("Start/end dates/times invalid: " + str(e))
-
-    
+   
     for c in d_qa.columns:
         #Check min/max bounds
         try:
@@ -265,6 +257,16 @@ def createQAdf(d, sourceChars, indexCol, devThreshold=0.1, d_dev=None):
                 pass
             except Exception as e:
                 logging.warning("Source characteristics or alternate data invalid for " + c + ": " + str(e))
+
+    #Check start and end dates/times
+    try:
+        d_qa[(d_qa.index < sourceChars["start"]) | (d_qa.index > sourceChars["end"])] = 1
+        logging.info("Start bound: " + str(sourceChars["start"]) + "\tEnd bound: " + str(sourceChars["end"]))
+    except KeyError:
+        pass
+    except Exception as e:
+        logging.warning("Start/end dates/times invalid: " + str(e))
+
 
     return d_qa
 
