@@ -14,6 +14,19 @@
 
 If an alternate data source uses a larger sample interval than the primary source, values will be back-filled.  An alternate source with a shorter sample interval than the primary source may have issues (has not been tested).
 
+**Warning:** These scripts WILL overwrite files of the same name in the output directory.  If an existing file is locked, it will append an integer to the end of the file name.
+
+**Other Notes:**
+In the future, the functions used in these scripts should be made into a proper object-oriented class.  This would also simplify the number of variables that need to be passed around globally by letting them exist privately in the class.
+
+These scripts are not optimized for memory usage and should be expected to potentially use more than twice the memory as the size of the original data, possibly much more depending on resampling intervals.  They are also not optimized for multi-threaded processing; an obvious improvement could be made by run resmapling of different intervals in parallel.
+
+**Known Issues:**
+- If timestamp column isn't first, resampling may fail.
+- Index column is not excluded from correlation calcs, throws a warning but doesn't affect output.
+
+### QA Mask
+
 After running Level0to1.py, the output should be manually reviewed in preparation for running Level1to2.py.  Specifically, the QA mask file should be updated to reflect the desired changes for Level 2.
 
 The QA mask file contains the following flags for each data point, which will indicate the corresponding actions to take in Level1to2.py.
@@ -25,18 +38,21 @@ The QA mask file contains the following flags for each data point, which will in
 |2|Out of source characteristic range|Replace with Nan value|
 |3|Significant deviation from alternate source|Replace with alternate source value|
 
-An easy way to to check and modify the flagged areas is to open the mask file in Excel and filter by the column and flag of interest.  Affected values can then easily be selected and changed in bulk.  The modified file should be saved as ***filename_Level2_mask.csv***.  Be sure that the Timestamp format in Excel is set to "yyyy-mm-dd hh:mm:ss" before saving.
+An easy way to check and modify the flagged areas is to open the mask file in Excel and filter by the column and flag of interest.  Affected values can then easily be selected and changed in bulk.  The modified file should be saved as ***filename_Level2_mask.csv***.  Be sure that the Timestamp format in Excel is set to "yyyy-mm-dd hh:mm:ss" before saving.
 
-**Warning:** These scripts WILL overwrite files of the same name in the output directory.  If an existing file is locked, it will append an integer to the end of the file name.
+### Source Characteristics
 
-**Other Notes:**
-In the future, the functions used in these scripts should be made into a proper object-oriented class.  This would also simplify the number of variables that need to be passed around globally by letting them exist privately in the class.
+This should be a CSV with information about the data sources.  Ideally, one row should be used for each type of measurement.  The fields currently implemented are:
+|Field|Function|Format|
+|-|-|-|
+|"Min"|Minimum expected value, used to classify QA flag "2"|Float|
+|"Max"|Maximum expected value, used to classify QA flag "2"|Float|
+|"Useful Decimal Places"|Decimal places to use in the final output|Integer|
+|"Columns"|Determines which source column(s) the parameters in the row should apply to.|String(s), separated by ';' for multiple|
+|"Start", Timestamp<BR>(In first, second columns of any row)|Starting date/time of dataset, used to classify QA flag "1"|String,Timestamp| 
+|"End", Timestamp<BR>(In first, second columns of any row)|Ending date/time of dataset, used to classify QA flag "1"|String,Timestamp| 
 
-These scripts are not optimized for memory usage and should be expected to potentially use more than twice the memory as the size of the original data, possibly much more depending on resampling intervals.  They are also not optimized for multi-threaded processing; an obvious improvement could be made by run resmapling of different intervals in parallel.
-
-**Known Issues:**
-- If timestamp column isn't first, resampling may fail.
-- Index column is not excluded from correlation calcs, throws a warning
+Additional columns can be added as reference without any effect.
 
 
 ******************************
