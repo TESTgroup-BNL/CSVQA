@@ -251,7 +251,7 @@ def createQAdf(d, sourceChars, indexCol, devThreshold=0.1, d_dev=None):
                 if c != indexCol:
                     devCol = c + "_dev"
                     maxDev = (sourceChars[c]["maxVal"] - sourceChars[c]["minVal"])*devThreshold
-                    d_qa[c] = d_qa[c].mask(abs(d_dev[devCol]) >  maxDev, d_qa[c] + 3)
+                    d_qa[c] = d_qa[c].mask(abs(d_dev[devCol]) >  maxDev, d_qa[c] + 4)
                     logging.info("For " + c + ", using max deviation: " + str(maxDev))
             except KeyError:
                 pass

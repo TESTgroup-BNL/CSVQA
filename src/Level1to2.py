@@ -4,6 +4,7 @@ import logging
 from datetime import datetime
 from glob import glob
 import pandas as pd
+import numpy as np
 import configparser
 from ast import literal_eval as le
 from datetime import datetime
@@ -283,21 +284,21 @@ def applyQA(d, d_qa, d_dev):
     logging.info("Applying QA mask...")
       
     #Replace out of range values with Nans
-    d_out = d.mask(d_qa==2, pd.NA)
+    d.mask(d_qa==2, np.nan, inplace=True)
 
     #Fill alternate data
-    for c in d_out:
+    for c in d:
         try:
-            d_out[c] = d_out[c].mask(d_qa[c]==4, d_dev[c + "_alt"])
+            d[c].mask(d_qa[c]==4, d_dev[c + "_alt"], inplace=True)
         except KeyError:
             pass
         except Exception as e:
             logging.warning("Error applying alternate data for " + c + ": " + str(e))
 
     #Trim start and end times
-    d_out = d_out[d_qa["TIMESTAMP"]!=1]
+    d = d[d_qa["TIMESTAMP"]!=1]
 
-    return d_out
+    return d
 
 
 if __name__ == "__main__":
@@ -305,7 +306,7 @@ if __name__ == "__main__":
     logCurrentFile = ""
     opts = readConfig()
 
-    fPath = genOutputFname(opts["Input"]["fpath"],opts["Input"]["inputFile"],"_Level1")
+    fPath = genOutputFname(opts["Output"]["outputPath"],opts["Input"]["inputFile"],"_Level1")
 
     for fname in getFiles(fPath, opts["Level 1"]["altFileSuffix"]):
 
