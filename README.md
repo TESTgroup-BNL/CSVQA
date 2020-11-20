@@ -12,11 +12,28 @@
 
 <I>\*(If alternate source included)</I>
 
+### Recommended Procedure:
+1. Prepare Sources
+    * Prepare source_characteristics.csv
+    * Format any alternate data to have the same column names and filename appended with "_alt" as the primary source
+    * Create a copy of default.conf for the specific data run and make any necessary changes
+    
+2. Run Level0to1.py
+
+3. Review Output
+    * *filename_Level1_qa_stats.csv* is useful to determine where to look for issues, by looking at the QA mask counts and stats and for each field.
+    * *filename_Level1_dev.csv* is useful to compare primary and alternate sources.
+    * *filename_Level1_qa.csv* should be modified to match the intended QA actions.  This should include replacing any combination flags.
+    * *filename_Level1.csv* is always good reference for checking what data raised flags.
+    
+4. Run Level1to2.py.
+
 If an alternate data source uses a larger sample interval than the primary source, values will be back-filled.  An alternate source with a shorter sample interval than the primary source may have issues (has not been tested).
 
 **Warning:** These scripts WILL overwrite files of the same name in the output directory.  If an existing file is locked, it will append an integer to the end of the file name.
 
 **Other Notes:**
+
 In the future, the functions used in these scripts should be made into a proper object-oriented class.  This would also simplify the number of variables that need to be passed around globally by letting them exist privately in the class.
 
 These scripts are not optimized for memory usage and should be expected to potentially use more than twice the memory as the size of the original data, possibly much more depending on resampling intervals.  They are also not optimized for multi-threaded processing; an obvious improvement could be made by run resmapling of different intervals in parallel.
