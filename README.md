@@ -36,7 +36,7 @@ If an alternate data source uses a larger sample interval than the primary sourc
 
 In the future, the functions used in these scripts should be made into a proper object-oriented class.  This would also simplify the number of variables that need to be passed around globally by letting them exist privately in the class.
 
-These scripts are not optimized for memory usage and should be expected to potentially use more than twice the memory as the size of the original data, possibly much more depending on resampling intervals.  They are also not optimized for multi-threaded processing; an obvious improvement could be made by run resmapling of different intervals in parallel.
+These scripts are not optimized for memory usage and should be expected to potentially use more than twice the memory as the size of the original data, possibly much more depending on resampling intervals.  They are also not optimized for multi-threaded processing; an obvious improvement could be made by run resampling of different intervals in parallel.
 
 **Known Issues:**
 - If timestamp column isn't first, resampling may fail.
@@ -55,8 +55,9 @@ The QA mask file contains the following flags for each data point, which will in
 |2|Out of source characteristic range|Replace with Nan value|
 |3|1 + 2|None|
 |4|Significant deviation from alternate source|Replace with alternate source value|
-|5|2 + 3|None|
-|6|1 + 2 + 3|None|
+|5|1 + 4|None|
+|6|2 + 4|None|
+|7|1 + 2 + 4|None|
 
 An easy way to check and modify the flagged areas is to open the mask file in Excel and filter by the column and flag of interest.  Affected values can then easily be selected and changed in bulk.  The modified file should be saved as ***filename_Level2_mask.csv***.  Be sure that the Timestamp format in Excel is set to "yyyy-mm-dd hh:mm:ss" before saving.  Combination flags have no effect on the output and should be manually replaced to reflect the intended action.
 
