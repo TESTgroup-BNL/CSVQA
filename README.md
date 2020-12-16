@@ -107,3 +107,7 @@ See parameters defined in script for details.
 |source_characteristics.csv|Source characteristics file|
 
 \*Not yet uploaded
+
+
+Zenodo archive: <br>
+[![DOI](https://zenodo.org/badge/300742022.svg)](https://zenodo.org/badge/latestdoi/300742022)
