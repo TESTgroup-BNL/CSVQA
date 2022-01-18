@@ -4,6 +4,12 @@ import logging
 from datetime import datetime
 from glob import glob
 import pandas as pd
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+import matplotlib.patches as mpatches
+import numpy as np
 import configparser
 from ast import literal_eval as le
 from datetime import datetime
@@ -99,7 +105,9 @@ def setupLogging(fpath, consoleLogLevel=0):
 def getFiles(fpath, altFileSuffix=None):
     f_list = [f for f in glob(fpath)]
     if not altFileSuffix is None:
-        f_list_filtered = [f for f in f_list if os.path.splitext(f)[0][-len(altFileSuffix):] != altFileSuffix]
+        f_list = [f for f in f_list if os.path.splitext(f)[0][-len(altFileSuffix):] != altFileSuffix]
+
+    f_list_filtered = [f for f in f_list if not ("source_characteristics.csv" in f)]
     return f_list_filtered
 
 
@@ -258,6 +266,15 @@ def createQAdf(d, sourceChars, indexCol, devThreshold=0.1, d_dev=None):
             except Exception as e:
                 logging.warning("Source characteristics or alternate data invalid for " + c + ": " + str(e))
 
+    #Check for missing/existing Nan data
+    try:
+        d_qa[pd.isna(d)] = 8
+        logging.info("Checking for missing data...")
+    except KeyError:
+        pass
+    except Exception as e:
+        logging.warning("Problem checking data: " + str(e))
+
     #Check start and end dates/times
     try:
         d_qa[(d_qa.index < sourceChars["start"]) | (d_qa.index > sourceChars["end"])] += 1
@@ -271,21 +288,80 @@ def createQAdf(d, sourceChars, indexCol, devThreshold=0.1, d_dev=None):
     return d_qa
 
 
+def genOverviewPlot(d_qa, fpath, fname):
+    logging.info("Generating overview plot...")
+
+    d_resampled = d_qa.resample('1H').agg(lambda x: max(pd.Series.mode(x)))
+    #saveOutput(d_resampled, fpath, fname, "_Level1_qa_resampled", outputNans=opts["Output"]["outputNans"])
+
+    values = [0,1,2,3,4,5,6,7,8,9]
+    value_labels = ["Good", "Out of date range", "Out of variable range", "1+2", "Deviation from alternate", "1+4", "2+4", "1+2+4", "Missing", "1+8"]
+
+    palette = np.array([[128, 255, 128],   # light green
+                        [  0,   0,   0],   # black
+                        [255,   0,   0],   # red                    
+                        [128,   0,   0],   # dark red                    
+                        [255, 255,   0],   # yellow
+                        [128, 128,   0],   # dark yellow
+                        [255, 128,   0],   # orange
+                        [128,  64,   0],   # dark orange
+                        [128, 128, 128],   # gray
+                        [ 64,  64,  64]])  # dark gray
+                
+    rgb = palette[d_resampled.values[:,1:].astype('byte').T]
+
+    fig = plt.figure(figsize=(20, 10))
+    plt.text(x=0.5, y=0.94, s="Level 1 QA Overview", fontsize=14, ha="center", transform=fig.transFigure)
+    plt.text(x=0.5, y=0.918, s=os.path.split(fname)[1], fontsize=10, ha="center", transform=fig.transFigure)
+    plt.subplots_adjust(top=0.88, wspace=0.12)
+
+    axs = plt.subplot(111)
+    ylen = len(d.columns)-1
+
+    axs.set_yticks(np.arange(ylen))                     #add major ticks for gridlines
+    axs.set_yticklabels('')                             #remove major labels
+    axs.set_yticks(np.arange(ylen) + 0.5, minor=True)   #put the minor ticks between major ticks to center labels on each row
+    axs.set_yticklabels(list(d.columns[1:]), minor=True)
+
+    xlabels = mdates.date2num(list(d_resampled.index.to_pydatetime()))
+    axs.xaxis_date()
+    axs.xaxis.set_major_locator(mdates.WeekdayLocator([6]))    #Mark weeks
+    axs.xaxis.set_minor_locator(mdates.DayLocator())            #Mark days
+    axs.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
+    for label in axs.get_xticklabels(which='major'):
+        label.set(rotation=30, horizontalalignment='right')
+
+    axs.grid(True)
+    axs.grid(which='major', linewidth=2, axis='x')
+    axs.grid(which='major', linewidth=1, axis='y')
+    axs.grid(which='minor', linewidth=1, axis='x')
+
+    im = axs.imshow(rgb, extent=[xlabels[0], xlabels[-1], ylen, 0], origin='upper', aspect='auto', interpolation='none')
+
+    # create a patch (proxy artist) for every color 
+    patches = [ mpatches.Patch(color=palette[i]/255, label="{l}: {ll}".format(l=values[i], ll=value_labels[i]) ) for i in range(len(values)) ]
+    # put those patched as legend-handles into the legend
+    plt.legend(handles=patches, bbox_to_anchor=(1.01, 1), loc=2, borderaxespad=0., prop={'size': 10} )
+
+    plt.tight_layout()
+    plt.savefig(genOutputFname(fpath, fname, "_Level1_overview", ".png"), bbox_inches='tight')
+
+
 def calcQAStats(d, d_qa, d_dev):
     #QA Mask Stats
     d_stats = d_qa.apply(pd.value_counts)
-    d_stats = d_stats.reindex(range(7))
+    d_stats = d_stats.reindex(range(10))
     d_stats = d_stats.mask(d_stats.isna(),0).astype(int)
     
     #Alt source correlations
     if d_dev is not None:
-        s_coor = [pd.Series([],dtype=float,name="corr " + n) for n in ("raw","0","1","2","3","4","5","6")]
+        s_coor = [pd.Series([],dtype=float,name="corr " + n) for n in ("raw","0","1","2","3","4","5","6","7","8","9")]
         d_stats = d_stats.append(s_coor)
 
         for c in d_stats.columns:
             try:
                 d_stats[c]["corr raw"] = d_dev[c].corr(d_dev[c + "_alt"])
-                for n in range(7):
+                for n in range(10):
                     d_stats[c]["corr " + str(n)] = d_dev[c][d_qa[c]==n].corr(d_dev[c + "_alt"][d_qa[c]==n])
                     
             except KeyError:
@@ -299,9 +375,9 @@ def calcQAStats(d, d_qa, d_dev):
     return d_stats
     
 
-def genOutputFname(fpath, fname, sub):
+def genOutputFname(fpath, fname, sub, ext=".csv"):
     orig = os.path.splitext(os.path.join(fpath, os.path.split(fname)[1]))
-    return orig[0] + sub + ".csv"
+    return orig[0] + sub + ext
 
 
 def saveOutput(d, fpath, fname, sub, outputNans, indexCol=None, index=True):
@@ -375,6 +451,9 @@ if __name__ == "__main__":
 
         #Save QA stat data
         saveOutput(d_stats, opts["Output"]["outputPath"], fname, "_Level1_qa_stats", outputNans=opts["Output"]["outputNans"])
+
+        #Save overview image
+        genOverviewPlot(d_qa, opts["Output"]["outputPath"], fname)
 
     logCurrentFile = ""
     logging.info("Done.")

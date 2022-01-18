@@ -289,14 +289,14 @@ def applyQA(d, d_qa, d_dev):
     #Fill alternate data
     for c in d:
         try:
-            d[c].mask(d_qa[c]==4, d_dev[c + "_alt"], inplace=True)
+            d[c].mask(d_qa[c] in (4,6), d_dev[c + "_alt"], inplace=True)
         except KeyError:
             pass
         except Exception as e:
             logging.warning("Error applying alternate data for " + c + ": " + str(e))
 
     #Trim start and end times
-    d = d[d_qa["TIMESTAMP"]!=1]
+    d = d[d_qa["TIMESTAMP"] not in (1,3,5,7,9)]
 
     return d
 
