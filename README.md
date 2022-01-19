@@ -61,7 +61,9 @@ The QA mask file contains the following flags for each data point, which will in
 |8|No value/Nan|Replace/leave as Nan value|
 |9|1+8|Remove|
 
-A QA overview plot will be generated showing where and what varibles are affected by different flags.  This overview created by taking the mode of the QA flags aggregated by hour for each variable.
+A QA overview plot will be generated showing where and what variables are affected by different flags.  This overview is created by taking the mode of the QA flags aggregated by hour for each variable.  (Example shown below.)
+ 
+ ![Overview example](./data/sample_overview.png)
 
 An easy way to check and modify the flagged areas is to open the mask file in Excel and filter by the column and flag of interest.  Affected values can then easily be selected and changed in bulk.  The modified file should be saved as ***filename_Level2_mask.csv***.  Be sure that the Timestamp format in Excel is set to "yyyy-mm-dd hh:mm:ss" before saving.  Combination flags have no effect on the output and should be manually replaced to reflect the intended action.
 
