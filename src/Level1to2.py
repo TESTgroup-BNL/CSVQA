@@ -206,7 +206,7 @@ def calcQAStats(d, d_qa, d_dev):
     
     #Alt source correlations
     if d_dev is not None:
-        s_coor = [pd.Series([],dtype=float,name="corr " + n) for n in ("raw","0","1","2","3","4","5","6")]
+        s_coor = [pd.Series([],dtype=float,name="corr " + n) for n in ("raw","0","1","2","3","4","5","6","7","8","9")]
         d_stats = d_stats.append(s_coor)
 
         for c in d_stats.columns:
@@ -226,7 +226,7 @@ def calcQAStats(d, d_qa, d_dev):
     return d_stats
     
 
-def avgToFreqs(d, ts="TIMESTAMP", maxMissing=0.1, timeCols=["TIMESTAMP"], freqs=[], *args, **kwargs):
+def avgToFreqs(d, ts="TIMESTAMP", maxMissing=0.1, timeCols=["TIMESTAMP"], freqs=[], excludeMissing=[], *args, **kwargs):
     logging.info("Resampling data...")
     agg_funcs = {}
     for col in d.columns:
@@ -245,6 +245,12 @@ def avgToFreqs(d, ts="TIMESTAMP", maxMissing=0.1, timeCols=["TIMESTAMP"], freqs=
 
         minCountNotReached = d_resampled_size.iloc[:,1:] > maxMissing                       #Creates array where True indicates less than the required values are present in a group
         
+        try:
+            for col in excludeMissing:
+                minCountNotReached[col] = False                                             #Unmarks columns where Nans should be ignored
+        except KeyError:
+            pass
+
         d_out[f] = d_resampled.agg(agg_funcs)
         d_out[f].mask(minCountNotReached, inplace=True)
 
@@ -289,14 +295,14 @@ def applyQA(d, d_qa, d_dev):
     #Fill alternate data
     for c in d:
         try:
-            d[c].mask(d_qa[c] in (4,6), d_dev[c + "_alt"], inplace=True)
+            d[c].mask(d_qa[c].isin((4,6)), d_dev[c + "_alt"], inplace=True)
         except KeyError:
             pass
         except Exception as e:
             logging.warning("Error applying alternate data for " + c + ": " + str(e))
 
     #Trim start and end times
-    d = d[d_qa["TIMESTAMP"] not in (1,3,5,7,9)]
+    d = d[~d_qa["TIMESTAMP"].isin((1,3,5,7,9))]
 
     return d
 
