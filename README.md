@@ -8,7 +8,7 @@
 |Level 0   |  Data acquisition   |   Raw data   | N/A
 |Level 1   | - Primary data as CSV(s): *filename.csv*<BR>- Configuration file: *default.conf*<BR>Optionally:<BR>- Source characteristics file<BR>- Alternate data source files(s): *filename_alt.csv* | -Level 1 data: *filename_Level1.csv* <BR>- QA mask file: *filename_Level1_qa.csv*<BR>- Deviation file:*filename_Level1_dev.csv*<BR>- Log file| Level0to1.py|
 |Level 2   | - Level 1 data: *filename_Level1.csv*<BR>- Configuration file: *default.conf*<BR>- Reviewed QA mask file: *filename_Level2_mask.csv* <BR>- Deviation file: *filename_Level1_dev.csv* | - Processed, combined\* data: *filename_Level2.csv*<BR>- Data aggregated to additional intervals: *filename_Level2_avg_interval.csv* | Level1to2.py |
-|Level 3   | | | | 
+|Level 2 Aggregate to Intervals Only  | - Reviewed Level 2 data: *filename_Level2.csv*<BR>- Configuration file: *default.conf* | - Data aggregated to additional intervals: *filename_Level2_agg_avg_interval.csv* | Level2_agg_only.py | 
 
 <I>\*(If alternate source included)</I>
 
@@ -28,7 +28,9 @@
     
 4. Run Level1to2.py.
 
-If an alternate data source uses a larger sample interval than the primary source, values will be back-filled.  An alternate source with a shorter sample interval than the primary source may have issues (has not been tested).
+    If an alternate data source uses a larger sample interval than the primary source, values will be back-filled.  An alternate source with a shorter sample interval than the primary source may have issues (has not been tested).
+
+5. If needed, manually review the output and run Level2_agg_only.py to run only data aggregation at additional intervals.  Note that Level2_agg_only.py is effectively the same as running only the last step of Level1to2.py.
 
 **Warning:** These scripts WILL overwrite files of the same name in the output directory.  If an existing file is locked, it will append an integer to the end of the file name.
 
