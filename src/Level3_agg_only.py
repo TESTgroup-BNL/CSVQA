@@ -312,11 +312,11 @@ if __name__ == "__main__":
     logCurrentFile = ""
     opts = readConfig()
 
-    fPath = genOutputFname(opts["Output"]["outputPath"],opts["Input"]["inputFile"],"_Level2")
+    fPath = genOutputFname(opts["Output"]["outputPath"],opts["Input"]["inputFile"],"_Level3")
 
     for fname in getFiles(fPath, opts["Level 1"]["altFileSuffix"]):
 
-        fname_out = fname.replace("_Level2","")
+        fname_out = fname.replace("_Level3","")
         
         #Load Level 2 data
         d = loadData(fname, ts=opts["Input"]["indexCol"], nan_vals=opts["Output"]["outputNans"])
@@ -337,7 +337,7 @@ if __name__ == "__main__":
 
         #Save base freq
         applyDataTypes(d, opts["Input"]["intCols"], opts["Input"]["timeCols"], opts["Output"]["outputNans"], opts["Output"]["outputDecs"], colDecs)
-        saveOutput(d, opts["Output"]["outputPath"], fname_out, "_Level3", outputNans=opts["Output"]["outputNans"], index=False)
+        saveOutput(d, opts["Output"]["outputPath"], fname_out, "_Level3_agg", outputNans=opts["Output"]["outputNans"], index=False)
 
         #Save additional sample intervals
         for d_freq in d_out:
@@ -345,7 +345,7 @@ if __name__ == "__main__":
             applyDataTypes(d_out[d_freq], opts["Input"]["intCols"], opts["Input"]["timeCols"], opts["Output"]["outputNans"], opts["Output"]["outputDecs"], colDecs)
 
             #Save Level 3 data
-            saveOutput(d_out[d_freq], opts["Output"]["outputPath"], fname_out, "_Level3_" + d_freq, outputNans=opts["Output"]["outputNans"], indexCol=opts["Input"]["indexCol"])
+            saveOutput(d_out[d_freq], opts["Output"]["outputPath"], fname_out, "_Level3_agg_" + d_freq, outputNans=opts["Output"]["outputNans"], indexCol=opts["Input"]["indexCol"])
 
     logCurrentFile = ""
     logging.info("Done.")
