@@ -226,7 +226,7 @@ def calcQAStats(d, d_qa, d_dev):
     return d_stats
     
 
-def avgToFreqs(d, ts="TIMESTAMP", maxMissing=0.1, timeCols=["TIMESTAMP"], freqs=[], excludeMissing=[], *args, **kwargs):
+def avgToFreqs(d, ts="TIMESTAMP", maxMissing=0.1, timeCols=["TIMESTAMP"], freqs=[], excludeMissing=[], tsFormats=[], *args, **kwargs):
     logging.info("Resampling data...")
     agg_funcs = {}
     for col in d.columns:
@@ -238,7 +238,7 @@ def avgToFreqs(d, ts="TIMESTAMP", maxMissing=0.1, timeCols=["TIMESTAMP"], freqs=
             agg_funcs.update({col: 'mean'})
             
     d_out = {}
-    for f in freqs:
+    for idx_f, f in enumerate(freqs):
         logging.info("\tInterval: " + f)
         d_resampled = d.resample(f)
         d_resampled_size = d_resampled.apply(lambda x: x.isnull().sum()/len(x))             #Calculates fraction of nan values in each group
@@ -257,6 +257,13 @@ def avgToFreqs(d, ts="TIMESTAMP", maxMissing=0.1, timeCols=["TIMESTAMP"], freqs=
         missingData = round(d_out[f].isnull().sum()/len(d_out[f])*100, 2)
         logging.debug("\n\t\t" + str(d_out[f]).replace("\n","\n\t\t"))
         logging.debug("\n\tData missing per column (%):\n\t\t" + str(missingData).replace("\n","\n\t\t"))
+
+        #Update timestamp format
+        if tsFormats is not None:
+            try:
+                d_out[f].index = d_out[f].index.map(lambda x: x.strftime(tsFormats[idx_f]))
+            except (ValueError, TypeError) as e:
+                logging.error("Error processing time format: %s" % str(e))
 
     return d_out
 
