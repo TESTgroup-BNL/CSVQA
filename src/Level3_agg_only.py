@@ -264,7 +264,10 @@ def avgToFreqs(d, ts="TIMESTAMP", maxMissing=0.1, timeCols=["TIMESTAMP"], freqs=
 def applyDataTypes(df, intCols, timeCols, outputNans, outputDecs, colDecs):
     #Fix integer columns
     for intCol in intCols:
-        df[intCol] = df[intCol].map(lambda x: '%i' % x if not pd.isna(x) else outputNans)
+        try:
+            df[intCol] = df[intCol].map(lambda x: '%i' % x if not pd.isna(x) else outputNans)
+        except KeyError:
+            logging.warning("Column defined in config but not present: " + intCol)
 
     #Apply precision
     if outputDecs == 'original':
